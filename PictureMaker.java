@@ -7,10 +7,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+
+import static java.nio.file.StandardCopyOption.*;
 
 
 public class PictureMaker {
@@ -83,7 +86,8 @@ public class PictureMaker {
 		int mode = Integer.parseInt(args[0]);
 		String imgpath = null;
 		String twoDcodeImage = null;
-	
+		String advertiseImage = null;
+		
 		switch (mode) 
 		{
 		case 1:
@@ -108,8 +112,14 @@ public class PictureMaker {
 			break;
 		
 		case 3:
-			System.out.println("Error: currently only support mode 1 2");
-			return;
+			if(args.length != 3) {
+				System.out.println("Error, should input two image path");
+				return;
+			}
+			
+			imgpath = args[1];
+			advertiseImage = args[2];
+			break;
 			
 		default:
 			System.out.println("Error: currently only support mode 1 2");
@@ -136,8 +146,7 @@ public class PictureMaker {
 		
 		
 		if (checkfile(dirname, picname) == false) {
-			System.out
-					.println("Error: input image file should less than 4MB, end with jpg or jpeg");
+			System.out.println("Error: input image file should less than 4MB, end with jpg or jpeg");
 			return;
 		}
 		
@@ -147,22 +156,24 @@ public class PictureMaker {
 		
 		if(file_have_exif(picname)) {
 			resultimg = ImageUtils.rotate(dirname, picname);
-			//System.out.println("do rotation  resultimg: " + resultimg);
 		}
 		
 		/*step 2, do cut. return the new file */
 		resultimg = ImageUtils.crop_center(dirname, resultimg);
-		 //System.out.println(resultimg);
 
 		/*step3, do text composition. if the text is null, no text compose*/
 		//text_compose will generate the whole buffer... do it any way...
 		 resultimg = ImageUtils.text_compose(dirname, resultimg, Optiontext);
-		 //System.out.println(resultimg);
 
+		 if(twoDcodeImage != null)
+			 resultimg = ImageUtils.pictureCompose(dirname, resultimg, twoDcodeImage);
 		 
-		 resultimg = ImageUtils.pictureCompose(dirname, resultimg, twoDcodeImage);
+		 if(advertiseImage != null)
+			 resultimg = ImageUtils.advertiseCompose(dirname, resultimg, advertiseImage);
+
+		 resultimg = ImageUtils.copy_image(dirname, resultimg, picname);
 		 
-		 System.out.println(dirname + resultimg);
+		 System.out.println(resultimg);
 		
 	}// main
 }

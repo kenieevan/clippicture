@@ -26,215 +26,285 @@ import javax.imageio.ImageIO;
 
 public class ImageUtils {
 
-    public static String IMAGE_TYPE_GIF = "gif";
-    public static String IMAGE_TYPE_JPG = "jpg";
-    public static String IMAGE_TYPE_JPG1 = "JPG";
-    public static String IMAGE_TYPE_JPG2 = "JPEG";
-    public static String IMAGE_TYPE_JPEG = "jpeg";
-    public static String IMAGE_TYPE_BMP = "bmp";
-    public static String IMAGE_TYPE_PNG = "png";
-    //public static String IMAGE_TYPE_PSD = "psd";
+	public static String IMAGE_TYPE_GIF = "gif";
+	public static String IMAGE_TYPE_JPG = "jpg";
+	public static String IMAGE_TYPE_JPG1 = "JPG";
+	public static String IMAGE_TYPE_JPG2 = "JPEG";
+	public static String IMAGE_TYPE_JPEG = "jpeg";
+	public static String IMAGE_TYPE_BMP = "bmp";
+	public static String IMAGE_TYPE_PNG = "png";
+	// public static String IMAGE_TYPE_PSD = "psd";
 
-    public static String IMAGE_TYPE[] = 
-    {IMAGE_TYPE_GIF, IMAGE_TYPE_JPG, IMAGE_TYPE_JPG1, IMAGE_TYPE_JPG2, IMAGE_TYPE_JPEG, IMAGE_TYPE_BMP, IMAGE_TYPE_PNG };
-    
-    static boolean debug = true;
-    
-    private static String get_file_type(String filename)
-    {
-    	int dot = filename.lastIndexOf(".");
+	public static String IMAGE_TYPE[] = { IMAGE_TYPE_GIF, IMAGE_TYPE_JPG,
+			IMAGE_TYPE_JPG1, IMAGE_TYPE_JPG2, IMAGE_TYPE_JPEG, IMAGE_TYPE_BMP,
+			IMAGE_TYPE_PNG };
+
+	static boolean debug = false;
+
+	private static String get_file_type(String filename) {
+		int dot = filename.lastIndexOf(".");
 		String ext = filename.substring(dot + 1);
-		
+
 		return ext;
-    }
-    
-    //the picture layout:
-    //   the whole buffer is (2100 , 3000)
-    //   the picture starts at (60, 280)
-    //   the picture rectangle length (2100 - 120 = 1980) ...   y =1980 + 280 = 2260
-    
-    //   For text ( x=150, y = 2500 )
-    //   For 2D code the gap between 2d code and 2420 - 2260 = 160. The space for the 2D code is (500, 500). End with 2920.
-    //   for logo (x=2100-100 ,2420,  )  logo size  (1587 * 696)
-    
-    //compose the twoDcodeImage and the logo under the bottom of srcImg 
-    //return the new file.
-static  int bufferWidth  = 2100;
-static  int bufferHeight = 3000;
+	}
 
-//main image pos
-static  int picOffsetX = 60;
-static  int picOffsetY = 280;
+	// the picture layout:
+	// the whole buffer is (2100 , 3000)
+	// the picture starts at (60, 280)
+	// the picture rectangle length (2100 - 120 = 1980) ... y =1980 + 280 = 2260
 
-//text pos
-static int textoffsetX = 150;
-static int textoffsetY = bufferHeight - 500;
+	// For text ( x=150, y = 2500 )
+	// For 2D code the gap between 2d code and 2420 - 2260 = 160. The space for
+	// the 2D code is (500, 500). End with 2920.
+	// for logo (x=2100-100 ,2420, ) logo size (1587 * 696)
 
-//2D image pos
-static int twoDImgOffsetX = picOffsetX;
-static int twoDImgOffsetY = 2420;
-static int twoDImgWidth = 500;
-static int twoDImgHeight = 500;
+	// compose the twoDcodeImage and the logo under the bottom of srcImg
+	// return the new file.
+	static int bufferWidth = 2100;
+	static int bufferHeight = 3000;
 
-//logo position
+	// main image pos
+	static int picOffsetX = 60;
+	//static int picOffsetY = 280;
+	static int picOffsetY = 200;
 
-static int logoOffsetX = bufferWidth - 400;
-static int logoOffsetY = twoDImgOffsetY + 300;
-static int logoWidth = 300;
-static int logoHeight = (int)(logoWidth / 2.28);
+	
+	// text pos
+	static int textoffsetX = 150;
+	static int textoffsetY = bufferHeight - 500;
+
+	// 2D image pos
+	static int twoDImgOffsetX = picOffsetX;
+	static int twoDImgOffsetY = 160 + (picOffsetY + bufferWidth - 2 * picOffsetX);
+	static int twoDImgWidth = 500;
+	static int twoDImgHeight = 500;
+
+	// logo position
+	static int logoOffsetX = bufferWidth - 400;
+	static int logoOffsetY = twoDImgOffsetY + 300;
+	static int logoWidth = 300;
+	static int logoHeight = (int) (logoWidth / 2.28);
+
+	// advertisement card
+	static int advertiseX = picOffsetX;
+	static int advertiseY = 100 + (picOffsetY + bufferWidth - 2 * picOffsetX);
+	static int advertiseWidth = bufferWidth - 2 * picOffsetX; // 1980
+	static int advertiseHeight = 620;
 
 
-    public static String pictureCompose(String path, String srcImg, String twoDcodeImage)
-    {
-    	if(twoDcodeImage == null)
-    		return srcImg;
-    	
-    	//System.out.println("path " + path + "srcImg " + 
-    		//			srcImg + "twoDcodeimage" + twoDcodeImage);
-    	
-    	if(path == null)
-    			path = "";
-    	
-    	File srcFile = new File(path + srcImg);
-    	File twoDFile = new File(twoDcodeImage);
-    	
-    	String resultImgPath = null;
+	public static String advertiseCompose(String path, String srcImg, String advertise) {
+		if (advertise == null)
+			return srcImg;
 
-    	try {
-    		BufferedImage orgBi = ImageIO.read(srcFile);
-    		Graphics2D g2d = orgBi.createGraphics();
-    		
-    		BufferedImage twoDBi = ImageIO.read(twoDFile);
-        	int twoDW = twoDBi.getWidth();
-    		int twoDH = twoDBi.getHeight();
+		if (path == null)
+			path = "";
 
-    		int x = twoDImgOffsetX;
-    		int y = twoDImgOffsetY;
-    		int w = twoDImgWidth;
-    		int h = twoDImgHeight;
-    		
-    		//XXX modify the offset here!!!
-    		
-    		g2d.drawImage(twoDBi,
-					x, y, x + w, y + h,
-    				0, 0, twoDW, twoDH, null);
-		
-    		
-    		//XXX add logo draw..  	    
-    	    File srcLogoFile = new File("/usr/lib/jar/logo3.jpg");
-    	    BufferedImage logoBi = ImageIO.read(srcLogoFile);
-    	            
-    	    int logoFilex = logoBi.getWidth();
-    	    int logoFiley = logoBi.getHeight();
-    	    
-    	    int logox = logoOffsetX;
-    	    int logoy = logoOffsetY;
-    	    int logow = logoWidth;
-    	    int logoh = logoHeight;
-    	    
-    		g2d.drawImage(logoBi,		
-					logox, logoy,
-					logox + logow, logoy + logoh,
-    				0, 0, logoFilex, logoFiley, null);
-    	
-    		g2d.dispose();
-    		//write file
+		File srcFile = new File(path + srcImg);
+		File twoDFile = new File(advertise);
+
+		String resultImgPath = null;
+
+		try {
+			BufferedImage orgBi = ImageIO.read(srcFile);
+			Graphics2D g2d = orgBi.createGraphics();
+
+			BufferedImage twoDBi = ImageIO.read(twoDFile);
+			int twoDW = twoDBi.getWidth();
+			int twoDH = twoDBi.getHeight();
+
+			int x = advertiseX;
+			int y = advertiseY;
+			int w = advertiseWidth;
+			int h = advertiseHeight;
+
+
+			g2d.drawImage(twoDBi, x, y, x + w, y + h, 0, 0, twoDW, twoDH, null);
+
+			g2d.dispose();
+			// write file
 			FileOutputStream out = null;
-			resultImgPath = path + "twoD" + srcImg;
+			resultImgPath = path + "advertise" + srcImg;
 			out = new FileOutputStream(resultImgPath);
 			ImageIO.write(orgBi, get_file_type(srcImg), out);
-			
+
 			out.close();
-			
-    	}catch (Exception e) {
+
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-    	return "twoD" + srcImg;
-    }
-    
-    // test case
-    // path is null
-    // text too long with Chinese char
-    public static String text_compose(String path, String src_img_name, String text)
-    {
-    	//get the file's width and length
-    	int old_width = 0;
-    	int old_height = 0;
-    	
-        String fullpath = null;
-        
-    	try {
+		return "advertise" + srcImg;
+	}
 
-			if(path == null)
-				path="";
-			
-			File img = new File(path+src_img_name);
+
+	
+	public static String pictureCompose(String path, String srcImg,
+			String twoDcodeImage) {
+		if (twoDcodeImage == null)
+			return srcImg;
+
+		if (path == null)
+			path = "";
+
+		File srcFile = new File(path + srcImg);
+		File twoDFile = new File(twoDcodeImage);
+
+		String resultImgPath = null;
+
+		try {
+			BufferedImage orgBi = ImageIO.read(srcFile);
+			Graphics2D g2d = orgBi.createGraphics();
+
+			BufferedImage twoDBi = ImageIO.read(twoDFile);
+			int twoDW = twoDBi.getWidth();
+			int twoDH = twoDBi.getHeight();
+
+			int x = twoDImgOffsetX;
+			int y = twoDImgOffsetY;
+			int w = twoDImgWidth;
+			int h = twoDImgHeight;
+
+			// XXX modify the offset here!!!
+
+			g2d.drawImage(twoDBi, x, y, x + w, y + h, 0, 0, twoDW, twoDH, null);
+
+			// XXX add logo draw..
+			File srcLogoFile = new File("/usr/lib/jar/logo3.jpg");
+			BufferedImage logoBi = ImageIO.read(srcLogoFile);
+
+			int logoFilex = logoBi.getWidth();
+			int logoFiley = logoBi.getHeight();
+
+			int logox = logoOffsetX;
+			int logoy = logoOffsetY;
+			int logow = logoWidth;
+			int logoh = logoHeight;
+
+			g2d.drawImage(logoBi, logox, logoy, logox + logow, logoy + logoh,
+					0, 0, logoFilex, logoFiley, null);
+
+			g2d.dispose();
+			// write file
+			FileOutputStream out = null;
+			resultImgPath = path + "twoD" + srcImg;
+			out = new FileOutputStream(resultImgPath);
+			ImageIO.write(orgBi, get_file_type(srcImg), out);
+
+			out.close();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return "twoD" + srcImg;
+	}
+
+	// test case
+	// path is null
+	// text too long with Chinese char
+	public static String text_compose(String path, String src_img_name,
+			String text) {
+		// get the file's width and length
+		int old_width = 0;
+		int old_height = 0;
+
+		String fullpath = null;
+
+		try {
+
+			if (path == null)
+				path = "";
+
+			File img = new File(path + src_img_name);
 			BufferedImage org_img = ImageIO.read(img);
 
 			old_width = org_img.getWidth();
 			old_height = org_img.getHeight();
 
-			BufferedImage new_img = new BufferedImage(bufferWidth, bufferHeight,
-					BufferedImage.TYPE_INT_BGR);
+			BufferedImage new_img = new BufferedImage(bufferWidth,
+					bufferHeight, BufferedImage.TYPE_INT_BGR);
 
 			Graphics2D g2d = new_img.createGraphics();
-			
+
 			g2d.setBackground(Color.white);
 			g2d.clearRect(0, 0, bufferWidth, bufferHeight);
-			
+
 			int gap_x = picOffsetX;
 			int gap_y = picOffsetY;
-			
-			g2d.drawImage(org_img, 
-						  gap_x, gap_y,
-						  bufferWidth - gap_x, 
-						  (bufferWidth - 2 * gap_x) + gap_y,
-						  0, 0,
-						  old_width, old_height, null);
-			
+
+			g2d.drawImage(org_img, gap_x, gap_y, bufferWidth - gap_x,
+					(bufferWidth - 2 * gap_x) + gap_y, 0, 0, old_width,
+					old_height, null);
+
 			// draw text
 			if (text != null) {
-				//g2d.setColor(Color.magenta);
+				// g2d.setColor(Color.magenta);
 				g2d.setColor(Color.BLACK);
-				//g2d.setFont(new Font("黑体", Font.PLAIN, 100));
-				//g2d.setFont(new Font("仿宋体", Font.PLAIN, 100));
+				// g2d.setFont(new Font("黑体", Font.PLAIN, 100));
+				// g2d.setFont(new Font("仿宋体", Font.PLAIN, 100));
 				g2d.setFont(new Font("微软雅黑", Font.PLAIN, 100));
-				
+
 				g2d.setComposite(AlphaComposite.getInstance(
 						AlphaComposite.SRC_ATOP, 0.5f));
-				
-				//(width - (getLength(text) * 110))
-				g2d.drawString(text, 
-						textoffsetX,
-						textoffsetY);
+
+				// (width - (getLength(text) * 110))
+				g2d.drawString(text, textoffsetX, textoffsetY);
 			}
 
-			//finish drawing.
+			// finish drawing.
 			g2d.dispose();
-			
-			//write file
+
+			// write file
 			FileOutputStream out = null;
-			
-			fullpath = "compose"+src_img_name;
-			
+
+			fullpath = "compose" + src_img_name;
+
 			out = new FileOutputStream(path + fullpath);
-			
+
 			ImageIO.write(new_img, get_file_type(src_img_name), out);
-			
+
 			out.close();
-			
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	
+
 		return fullpath;
-    }
-    
-    public static String crop_center(String path, String src_img_name)
-    {
+	}
+
+	public static String copy_image(String path, String src_img_name,
+			String original) {
+		String dest_img_name = "final" + original;
+
+		try {
+			BufferedImage bi = null;
+
+			if (path != null) {
+				bi = ImageIO.read(new File(path + src_img_name));
+			} else {
+				bi = ImageIO.read(new File(src_img_name));
+
+			}
+
+			if (path != null) {
+				ImageIO.write(bi, get_file_type(src_img_name), new File(path
+						+ dest_img_name));
+			} else {
+				ImageIO.write(bi, get_file_type(src_img_name), new File(
+						dest_img_name));
+			}
+		}// try
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return dest_img_name;
+	}
+
+	public static String crop_center(String path, String src_img_name) {
 		try {
 			BufferedImage bi = null;
 
@@ -248,130 +318,126 @@ static int logoHeight = (int)(logoWidth / 2.28);
 			int w = bi.getWidth();
 			int h = bi.getHeight();
 
-			//System.out.println("crop_center w: " + w + " h: " + h);
+			// System.out.println("crop_center w: " + w + " h: " + h);
 			BufferedImage newimage = null;
-			
+
 			if (w >= h) {
 				newimage = bi.getSubimage(((w / 2 - h / 2)), 0, h, h);
 			} else {
-				//width < h
-				//newimage = bi.getSubimage(0, 0, w, w)
-				newimage = bi.getSubimage(0, (h-w)/2, w, w);
+				// width < h
+				// newimage = bi.getSubimage(0, 0, w, w)
+				newimage = bi.getSubimage(0, (h - w) / 2, w, w);
 			}
-			
+
 			if (path != null) {
 
-				ImageIO.write(newimage, get_file_type(src_img_name), 
-						new File(path + "crop"+ src_img_name));
+				ImageIO.write(newimage, get_file_type(src_img_name), new File(
+						path + "crop" + src_img_name));
 			} else {
-				ImageIO.write(newimage, get_file_type(src_img_name), new File("crop" + src_img_name));
+				ImageIO.write(newimage, get_file_type(src_img_name), new File(
+						"crop" + src_img_name));
 			}
-			
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return "crop"+src_img_name;
-    }
-    
-    /*
-    *		rotate the picture is needed 
-    * 		path: the image's folder path. may be null
-    * 		src_img_name: picture 's file name
-    * 	    des_img_name: rotated picture file name under the same path. if no rotaion done, it's the same as src_img_name
-    * 
-    *  		return value: the rotated image picture
-    */
-    public static String rotate(String path, String src_img_name)
-    {
-    	String filepath = null;	
-    	//System.out.println("path : " + path + "src_img_name : " + src_img_name );
-    	
-    	if (path == null) 
-    	{
-    		path = "";
-    	}
+		return "crop" + src_img_name;
+	}
 
-		filepath = path+src_img_name;
+	/*
+	 * rotate the picture is needed path: the image's folder path. may be null
+	 * src_img_name: picture 's file name des_img_name: rotated picture file
+	 * name under the same path. if no rotaion done, it's the same as
+	 * src_img_name
+	 * 
+	 * return value: the rotated image picture
+	 */
+	public static String rotate(String path, String src_img_name) {
+		String filepath = null;
+		// System.out.println("path : " + path + "src_img_name : " +
+		// src_img_name );
 
-    	String cmd = "java -jar /usr/lib/jar/metadata-extractor-2.6.4/metadata-extractor-2.6.4.jar  " + filepath;
-    	
- 		String matchLine = null;
+		if (path == null) {
+			path = "";
+		}
 
- 		try {
- 			Process p = Runtime.getRuntime().exec(cmd);
+		filepath = path + src_img_name;
 
- 			if (debug) {
- 				//System.out.println("process exits normally");
- 			}
- 			
- 			BufferedReader stdInput = new BufferedReader(new InputStreamReader(
- 					p.getInputStream()));
+		String cmd = "java -jar /usr/lib/jar/metadata-extractor-2.6.4/metadata-extractor-2.6.4.jar  "
+				+ filepath;
 
- 			BufferedReader stdError = new BufferedReader(new InputStreamReader(
- 					p.getErrorStream()));
+		String matchLine = null;
 
- 	 		String s = null;
- 	 		Pattern pattern = Pattern.compile("IFD0\\] Orientation");
+		try {
+			Process p = Runtime.getRuntime().exec(cmd);
 
- 			// read the output from the command
- 			// System.out.println("Here is the standard output of the command");
- 			while ((s = stdInput.readLine()) != null) {
- 				if (debug) {
- 					// System.out.println(s);
- 				}
- 				Matcher matcher = pattern.matcher(s);
- 				if (matcher.find()) {
- 					// System.out.println(s);
- 					matchLine = s;
- 					break;
- 				}
-
- 			}
-
- 			// read any errors from the attempted command
 			if (debug) {
-				//System.out
-					//	.println("Here is the standard error of the command (if any):\n");
+				// System.out.println("process exits normally");
+			}
 
-				while ((s = stdError.readLine()) != null) {
-					System.out.println(s);
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(
+					p.getInputStream()));
+
+			BufferedReader stdError = new BufferedReader(new InputStreamReader(
+					p.getErrorStream()));
+
+			String s = null;
+			Pattern pattern = Pattern.compile("IFD0\\] Orientation");
+
+			// read the output from the command
+			// System.out.println("Here is the standard output of the command");
+			while ((s = stdInput.readLine()) != null) {
+				if (debug) {
+					// System.out.println(s);
+				}
+				Matcher matcher = pattern.matcher(s);
+				if (matcher.find()) {
+					// System.out.println(s);
+					matchLine = s;
+					break;
 				}
 
 			}
+
+			// read any errors from the attempted command
+			if (debug) {
+				// System.out
+				// .println("Here is the standard error of the command (if any):\n");
+
+				while ((s = stdError.readLine()) != null) {
+					// System.out.println(s);
+				}
+
+			}
+		} catch (Exception e) {
+			// System.out.println("meta read exception : ");
+			e.printStackTrace();
 		}
- 		catch (Exception e) {
- 			System.out.println("meta read exception : ");
- 			e.printStackTrace();
- 		}
 
- 		//no  exif meta header read. don't do rotation.
- 		if(matchLine == null)
- 		{
- 			return src_img_name;
- 		}
- 		
- 		// Now, get sentence like [Exif IFD0] Orientation = Right side, top
- 		// (Rotate 90 CW)
- 		/*
- 		 * case 1: return "Top, left side (Horizontal / normal)"; case 2: return
- 		 * "Top, right side (Mirror horizontal)"; case 3: return
- 		 * "Bottom, right side (Rotate 180)"; case 4: return
- 		 * "Bottom, left side (Mirror vertical)"; case 5: return
- 		 * "Left side, top (Mirror horizontal and rotate 270 CW)"; case 6:
- 		 * return "Right side, top (Rotate 90 CW)"; case 7: return
- 		 * "Right side, bottom (Mirror horizontal and rotate 90 CW)"; case 8:
- 		 * return "Left side, bottom (Rotate 270 CW)";
- 		 */
+		// no exif meta header read. don't do rotation.
+		if (matchLine == null) {
+			return src_img_name;
+		}
 
- 		// currently, support no mirror.... this should be seldom case
- 		// get the digits pattern here
+		// Now, get sentence like [Exif IFD0] Orientation = Right side, top
+		// (Rotate 90 CW)
+		/*
+		 * case 1: return "Top, left side (Horizontal / normal)"; case 2: return
+		 * "Top, right side (Mirror horizontal)"; case 3: return
+		 * "Bottom, right side (Rotate 180)"; case 4: return
+		 * "Bottom, left side (Mirror vertical)"; case 5: return
+		 * "Left side, top (Mirror horizontal and rotate 270 CW)"; case 6:
+		 * return "Right side, top (Rotate 90 CW)"; case 7: return
+		 * "Right side, bottom (Mirror horizontal and rotate 90 CW)"; case 8:
+		 * return "Left side, bottom (Rotate 270 CW)";
+		 */
 
- 	
+		// currently, support no mirror.... this should be seldom case
+		// get the digits pattern here
+
 		String degree = null;
- 		int degree_int = 0;	
-
+		int degree_int = 0;
 
 		Pattern p = Pattern.compile("\\d\\d+");
 		Matcher m = p.matcher(matchLine);
@@ -385,37 +451,33 @@ static int logoHeight = (int)(logoWidth / 2.28);
 			}
 		}
 
-		if (degree != null) 
-		{
+		if (degree != null) {
 			degree_int = Integer.parseInt(degree);
-		} 
-		else 
-		{
-			/*no need to do rotation*/
+		} else {
+			/* no need to do rotation */
 			degree_int = 0;
-			if(debug) {
-				//System.out.println("rotation degree is zero. return ");
+			if (debug) {
+				// System.out.println("rotation degree is zero. return ");
 			}
-			
+
 			return src_img_name;
 
 		}
 
-		
 		File img = new File(filepath);
 
 		BufferedImage old_img = null;
-		
+
 		try {
 			old_img = (BufferedImage) ImageIO.read(img);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 		int w = 0;
 		int h = 0;
-		
+
 		w = old_img.getWidth();
 		h = old_img.getHeight();
 
@@ -427,13 +489,14 @@ static int logoHeight = (int)(logoWidth / 2.28);
 		AffineTransform origXform = g2d.getTransform();
 		AffineTransform newXform = (AffineTransform) (origXform.clone());
 
-		newXform.rotate(Math.toRadians(degree_int), w / 2, h / 2); 
+		newXform.rotate(Math.toRadians(degree_int), w / 2, h / 2);
 
 		w = new_img.getWidth();
 		h = new_img.getHeight();
 
 		if (debug) {
-			System.out.println("new image: w : " + w + "h: " + h + "rotation degree: " + degree_int);
+			System.out.println("new image: w : " + w + "h: " + h
+					+ "rotation degree: " + degree_int);
 		}
 
 		g2d.setTransform(newXform);
@@ -442,15 +505,12 @@ static int logoHeight = (int)(logoWidth / 2.28);
 
 		FileOutputStream out = null;
 		try {
-			if(path != null)
-			{
-				out = new FileOutputStream(path+"rotate"+src_img_name);
+			if (path != null) {
+				out = new FileOutputStream(path + "rotate" + src_img_name);
+			} else {
+				out = new FileOutputStream("rotate" + src_img_name);
 			}
-			else
-			{
-				out = new FileOutputStream("rotate"+src_img_name);
-			}
-			
+
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -458,7 +518,7 @@ static int logoHeight = (int)(logoWidth / 2.28);
 
 		try {
 			ImageIO.write(new_img, get_file_type(src_img_name), out);
-			System.out.println("rotation done");
+			// System.out.println("rotation done");
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -472,29 +532,26 @@ static int logoHeight = (int)(logoWidth / 2.28);
 				e.printStackTrace();
 			}
 		}
-		
-		return "rotate"+src_img_name;
+
+		return "rotate" + src_img_name;
 
 	}
-    
-    
-   
-    public final static int getLength(String text) {
-        int length = 0;
-    
-        for (int i = 0; i < text.length(); i++) {
-        	
-            if (new String(text.charAt(i) + "").getBytes().length > 1) {
-            
-            	length += 2;
-            
-            } else {
-               
-            	length += 1;
-            }
-        }
-        
-        return length > 15 ? 15 : length;
-    }
-}
 
+	public final static int getLength(String text) {
+		int length = 0;
+
+		for (int i = 0; i < text.length(); i++) {
+
+			if (new String(text.charAt(i) + "").getBytes().length > 1) {
+
+				length += 2;
+
+			} else {
+
+				length += 1;
+			}
+		}
+
+		return length > 15 ? 15 : length;
+	}
+}
