@@ -33,7 +33,6 @@ public class ImageUtils {
 	public static String IMAGE_TYPE_JPEG = "jpeg";
 	public static String IMAGE_TYPE_BMP = "bmp";
 	public static String IMAGE_TYPE_PNG = "png";
-	// public static String IMAGE_TYPE_PSD = "psd";
 
 	public static String IMAGE_TYPE[] = { IMAGE_TYPE_GIF, IMAGE_TYPE_JPG,
 			IMAGE_TYPE_JPG1, IMAGE_TYPE_JPG2, IMAGE_TYPE_JPEG, IMAGE_TYPE_BMP,
@@ -65,23 +64,22 @@ public class ImageUtils {
 
 	// main image pos
 	static int picOffsetX = 60;
-	//static int picOffsetY = 280;
+	// static int picOffsetY = 280;
 	static int picOffsetY = 200;
 
-	
 	// text pos
 	static int textoffsetX = 150;
 	static int textoffsetY = bufferHeight - 500;
 
 	// 2D image pos
-	static int twoDImgOffsetX = picOffsetX;
-	static int twoDImgOffsetY = 160 + (picOffsetY + bufferWidth - 2 * picOffsetX);
-	static int twoDImgWidth = 500;
-	static int twoDImgHeight = 500;
+	static int twoDX = picOffsetX;
+	static int twoDY = 160 + (picOffsetY + bufferWidth - 2 * picOffsetX);
+	static int twoDWidth = 500;
+	static int twoDHeight = 500;
 
 	// logo position
-	static int logoOffsetX = bufferWidth - 400;
-	static int logoOffsetY = twoDImgOffsetY + 300;
+	static int logoX = bufferWidth - 400;
+	static int logoY = twoDY + 300;
 	static int logoWidth = 300;
 	static int logoHeight = (int) (logoWidth / 2.28);
 
@@ -91,105 +89,54 @@ public class ImageUtils {
 	static int advertiseWidth = bufferWidth - 2 * picOffsetX; // 1980
 	static int advertiseHeight = 620;
 
-
-	public static String advertiseCompose(String path, String srcImg, String advertise) {
-		if (advertise == null)
-			return srcImg;
-
-		if (path == null)
-			path = "";
-
-		File srcFile = new File(path + srcImg);
-		File twoDFile = new File(advertise);
-
-		String resultImgPath = null;
-
-		try {
-			BufferedImage orgBi = ImageIO.read(srcFile);
-			Graphics2D g2d = orgBi.createGraphics();
-
-			BufferedImage twoDBi = ImageIO.read(twoDFile);
-			int twoDW = twoDBi.getWidth();
-			int twoDH = twoDBi.getHeight();
-
-			int x = advertiseX;
-			int y = advertiseY;
-			int w = advertiseWidth;
-			int h = advertiseHeight;
-
-
-			g2d.drawImage(twoDBi, x, y, x + w, y + h, 0, 0, twoDW, twoDH, null);
-
-			g2d.dispose();
-			// write file
-			FileOutputStream out = null;
-			resultImgPath = path + "advertise" + srcImg;
-			out = new FileOutputStream(resultImgPath);
-			ImageIO.write(orgBi, get_file_type(srcImg), out);
-
-			out.close();
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return "advertise" + srcImg;
+	public static String advertiseCompose(String path, String orgImg,
+			String advertise) {
+		return picCompose(path, orgImg, advertise, advertiseX, advertiseY,
+				advertiseWidth, advertiseHeight, "advertise");
 	}
 
+	// from should be /usr/lib/jar/logo3.jar
+	public static String logoCompose(String path, String to, String from) {
+		return picCompose(path, to, from, logoX, logoY, logoWidth, logoHeight,
+				"logo");
+	}
 
-	
-	public static String pictureCompose(String path, String srcImg,
-			String twoDcodeImage) {
-		if (twoDcodeImage == null)
-			return srcImg;
+	public static String voicecardCompose(String path, String to, String from) {
+		return picCompose(path, to, from, twoDX, twoDY, twoDWidth, twoDHeight,
+				"voice");
+	}
+
+	private static String picCompose(String path, String desImg, String srcImg,
+			int x, int y, int w, int h, String prefix) {
+		if (srcImg == null)
+			return desImg;
 
 		if (path == null)
 			path = "";
 
-		File srcFile = new File(path + srcImg);
-		File twoDFile = new File(twoDcodeImage);
+		File to = new File(path + desImg);
+		File from = new File(srcImg);
 
 		String resultImgPath = null;
 
 		try {
-			BufferedImage orgBi = ImageIO.read(srcFile);
-			Graphics2D g2d = orgBi.createGraphics();
+			BufferedImage toBi = ImageIO.read(to);
+			Graphics2D g2d = toBi.createGraphics();
 
-			BufferedImage twoDBi = ImageIO.read(twoDFile);
-			int twoDW = twoDBi.getWidth();
-			int twoDH = twoDBi.getHeight();
+			BufferedImage fromBi = ImageIO.read(from);
+			int filew = fromBi.getWidth();
+			int fileh = fromBi.getHeight();
 
-			int x = twoDImgOffsetX;
-			int y = twoDImgOffsetY;
-			int w = twoDImgWidth;
-			int h = twoDImgHeight;
-
-			// XXX modify the offset here!!!
-
-			g2d.drawImage(twoDBi, x, y, x + w, y + h, 0, 0, twoDW, twoDH, null);
-
-			// XXX add logo draw..
-			File srcLogoFile = new File("/usr/lib/jar/logo3.jpg");
-			BufferedImage logoBi = ImageIO.read(srcLogoFile);
-
-			int logoFilex = logoBi.getWidth();
-			int logoFiley = logoBi.getHeight();
-
-			int logox = logoOffsetX;
-			int logoy = logoOffsetY;
-			int logow = logoWidth;
-			int logoh = logoHeight;
-
-			g2d.drawImage(logoBi, logox, logoy, logox + logow, logoy + logoh,
-					0, 0, logoFilex, logoFiley, null);
+			g2d.drawImage(fromBi, x, y, x + w, y + h, 0, 0, filew, fileh, null);
 
 			g2d.dispose();
+
 			// write file
 			FileOutputStream out = null;
-			resultImgPath = path + "twoD" + srcImg;
+			resultImgPath = path + prefix + desImg;
 			out = new FileOutputStream(resultImgPath);
-			ImageIO.write(orgBi, get_file_type(srcImg), out);
+
+			ImageIO.write(toBi, get_file_type(desImg), out);
 
 			out.close();
 
@@ -198,7 +145,8 @@ public class ImageUtils {
 			e.printStackTrace();
 		}
 
-		return "twoD" + srcImg;
+		return prefix + desImg;
+
 	}
 
 	// test case
@@ -249,7 +197,6 @@ public class ImageUtils {
 				g2d.setComposite(AlphaComposite.getInstance(
 						AlphaComposite.SRC_ATOP, 0.5f));
 
-				// (width - (getLength(text) * 110))
 				g2d.drawString(text, textoffsetX, textoffsetY);
 			}
 
@@ -505,12 +452,7 @@ public class ImageUtils {
 
 		FileOutputStream out = null;
 		try {
-			if (path != null) {
-				out = new FileOutputStream(path + "rotate" + src_img_name);
-			} else {
-				out = new FileOutputStream("rotate" + src_img_name);
-			}
-
+			out = new FileOutputStream(path + "rotate" + src_img_name);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -537,6 +479,34 @@ public class ImageUtils {
 
 	}
 
+	public final static String getsubstring(String s, int num) {
+
+		
+		if(ImageUtils.getLength(s) <= 36)
+			return s;
+		
+		int count = 0;
+		StringBuffer res = new StringBuffer();
+
+		for (int i = 0; i < s.length(); i++) {
+			char j = s.charAt(i);
+			
+			if ((j & 0xff00 >>> 8) != 0) {
+				System.out.println("count +2");
+				count+=2;
+			}
+			
+			if (count <= num)
+				res.append((char) j);
+			else
+				break;
+		}
+
+		System.out.println(res.toString());
+		return res.toString();
+
+	}
+
 	public final static int getLength(String text) {
 		int length = 0;
 
@@ -552,6 +522,6 @@ public class ImageUtils {
 			}
 		}
 
-		return length > 15 ? 15 : length;
+		return length;
 	}
 }

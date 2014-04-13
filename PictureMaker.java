@@ -70,6 +70,7 @@ public class PictureMaker {
 		return true;
 	}
 
+   
 	// command line : C:\Users\jianming\workspace1\clipPicture\bin>java
 	// PictureMaker 20131002185329.jpg
 	
@@ -95,8 +96,9 @@ public class PictureMaker {
 			imgpath = args[1];
 			
 			if(args.length >= 3) {
-				Optiontext = args[2];	
+				Optiontext = ImageUtils.getsubstring(args[2], 36);							
 			}
+			
 			
 			break;
 		case 2:
@@ -160,16 +162,20 @@ public class PictureMaker {
 		
 		/*step 2, do cut. return the new file */
 		resultimg = ImageUtils.crop_center(dirname, resultimg);
-
+		
 		/*step3, do text composition. if the text is null, no text compose*/
 		//text_compose will generate the whole buffer... do it any way...
 		 resultimg = ImageUtils.text_compose(dirname, resultimg, Optiontext);
-
-		 if(twoDcodeImage != null)
-			 resultimg = ImageUtils.pictureCompose(dirname, resultimg, twoDcodeImage);
+		
+		 if(twoDcodeImage != null) {
+			 resultimg = ImageUtils.voicecardCompose(dirname, resultimg, twoDcodeImage);
+		 }
 		 
 		 if(advertiseImage != null)
 			 resultimg = ImageUtils.advertiseCompose(dirname, resultimg, advertiseImage);
+
+		 if( advertiseImage == null)
+			 resultimg = ImageUtils.logoCompose(dirname, resultimg, "/usr/lib/jar/logo3.jpg");
 
 		 resultimg = ImageUtils.copy_image(dirname, resultimg, picname);
 		 
